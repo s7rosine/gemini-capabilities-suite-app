@@ -25,6 +25,16 @@ jobs:
         with:
           fetch-depth: 0   # better scan coverage (history)
 
+          # ---------------------------
+      # 🧪 Create a TEST secret file (safe - not committed)
+      # ---------------------------
+      - name: Create test secret (for Gitleaks validation)
+        run: |
+          cat > gitleaks-test-secret.txt <<'EOF'
+          password = "P@ssw0rd_Test_Only_12345"
+          api_key = "ghp_FAKE1234567890FAKE1234567890"
+          EOF
+
       # ---------------------------
       # ✅ Install Gitleaks
       # ---------------------------
