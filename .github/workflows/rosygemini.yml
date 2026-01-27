@@ -1,0 +1,62 @@
+name: Docker Compose Deployment
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  security-events: write   # required to upload SARIF to GitHub Security tab
+
+jobs:
+  deploy:
+    name: Deploy with Docker Compose
+    runs-on:
+      - self-hosted
+      - label-2
+
+    steps:
+      # ---------------------------
+      # 1️⃣ Checkout source code
+      # ---------------------------
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # better scan coverage (history)
+
+      # ---------------------------
+      # ✅ Install Gitleaks
+      # ---------------------------
+      - name: Install Gitleaks
+        run: |
+          set -e
+          GITLEAKS_VERSION="8.21.2"
+          curl -sSL -o gitleaks.tar.gz \
+            https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz
+          tar -xzf gitleaks.tar.gz gitleaks
+          sudo mv gitleaks /usr/local/bin/gitleaks
+          gitleaks version
+
+      # ---------------------------
+      # ✅ Run Gitleaks (SARIF) - allowed / non-blocking
+      # ---------------------------
+      - name: Gitleaks scan (SARIF)
+        id: gitleaks
+        continue-on-error: true
+        run: |
+          gitleaks detect \
+            --source . \
+            --report-format sarif \
+            --report-path gitleaks.sarif \
+            --redact
+
+      # ---------------------------
+      # ✅ Upload SARIF to GitHub Security tab
+      # ---------------------------
+      - name: Upload Gitleaks SARIF
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: gitleaks.sarif
+          category: gitleaks
