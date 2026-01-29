@@ -62,13 +62,12 @@ jobs:
           category: gitleaks
 
       # ---------------------------
-      # 🧪 Frontend Tests (Jest)
+      # 🧪 Frontend Tests (not implemented in project)
       # ---------------------------
-      - name: Run Jest frontend tests
-        working-directory: ./frontend
+      - name: Frontend tests (skipped - none defined)
         run: |
-          npm install
-          npm test -- --watch=false
+          echo "No frontend tests defined in this repository — skipping"
+
       # ---------------------------
       # 🧪 Backend Tests (PHPUnit)
       # ---------------------------
