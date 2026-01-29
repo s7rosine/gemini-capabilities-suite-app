@@ -25,16 +25,6 @@ jobs:
         with:
           fetch-depth: 0   # better scan coverage (history)
 
-          # ---------------------------
-      # 🧪 Create a TEST secret file (safe - not committed)
-      # ---------------------------
-      - name: Create test secret (for Gitleaks validation)
-        run: |
-          cat > gitleaks-test-secret.txt <<'EOF'
-          password = "P@ssw0rd_Test_Only_12345"
-          api_key = "ghp_FAKE1234567890FAKE1234567890"
-          EOF
-
       # ---------------------------
       # ✅ Install Gitleaks
       # ---------------------------
@@ -70,3 +60,20 @@ jobs:
         with:
           sarif_file: gitleaks.sarif
           category: gitleaks
+
+      # ---------------------------
+      # 🧪 Frontend Tests (Jest)
+      # ---------------------------
+      - name: Run Jest frontend tests
+        working-directory: ./frontend
+        run: |
+          npm install
+          npm test -- --watch=false
+      # ---------------------------
+      # 🧪 Backend Tests (PHPUnit)
+      # ---------------------------
+      - name: Run PHPUnit backend tests
+        working-directory: ./backend
+        run: |
+          composer install
+          vendor/bin/phpunit
